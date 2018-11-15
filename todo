@@ -1,0 +1,9 @@
+1. Gui should offer user choice of pawn promotion
+2. Look at creating a position score for a board. This should not be a method of the board as the board should be
+game agnostic. It can produce a piece score as thats merely adding the value of pieces which is something each piece provides
+3. Search tree still produces some stupid moves even with deep moves. This normally shows as teh computer just giving up a piece
+4. When computer playing against computer can sometimes end with the king being taken - this then throws an exception and
+enters an endless loop. The user can hit new game but this immediately sets off the computer playing the computer again
+- this is definitely a problem with my Alpha Beta pruning - it's pruning too soon and missing good moves. When running
+without pruning the computer seems to make 'sensible' choices
+5. Stalemate after 3 repeated pairs of moves

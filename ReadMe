@@ -1,0 +1,13 @@
+To run:
+python chess.py
+This will give the option of running in GUI or terminal mode
+
+Can go direct to either by using:
+python chess.py -gui
+or
+python chess.py -terminal
+
+There is a debug mode which will print to terminal details of the search tree and the alpha beta pruning that happens:
+python chess.py -gui -debug
+or
+python chess.py -terminal -debug
