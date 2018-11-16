@@ -19,7 +19,7 @@ class BoardCanvas(tkinter.Canvas, AbstractObserver):
         canvasWidth = size * squareSize + padding*2
         canvasHeight = size * squareSize + padding*2
         tkinter.Canvas.__init__(self,master, width=canvasWidth, height=canvasHeight)
-        self.pack()
+       # self.pack()
         self._size = size
         self._squaresize = squareSize
         self._padding = padding
