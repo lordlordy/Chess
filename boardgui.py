@@ -213,10 +213,3 @@ class BoardCanvas(tkinter.Canvas, AbstractObserver):
 
 
 
-
-# if __name__ == '__main__':
-#     print('test')
-#     root = tkinter.Tk()
-#     BoardGUI(root, 8, 50)
-#     root.mainloop()
-

@@ -4,6 +4,7 @@ by Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides - The 'Gang Of Four'
 """
 
 from abc import ABC, abstractmethod
+import logging
 
 class AbstractObservable(ABC):
 
@@ -34,7 +35,7 @@ class Observable(AbstractObservable):
         try:
             self._observers.remove(observer)
         except:
-            print(f'{self._observers} does not contain {observer} so cannot remove it')
+            logging.warning(f'{self._observers} does not contain {observer} so cannot remove it')
 
     def notify(self, data):
         for o in self._observers:

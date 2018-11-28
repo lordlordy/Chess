@@ -1,6 +1,7 @@
 import board
 from chesspieces import Pawn, Bishop, Knight, Rook, Queen, King
 from observer import Observable, AbstractObserver
+import logging
 
 helptext = """
 This chess app allows you to play against another person or against a computer. 
@@ -234,7 +235,7 @@ class ChessGame(Observable):
 
     def _setStatus(self, newStatus):
         if newStatus != self._status:
-            # print(f'STATUS CHANGE {self._status} tp {newStatus}')
+            logging.debug(f'STATUS CHANGE {self._status} tp {newStatus}')
             self._status = newStatus
             self.notify({ChessConstants.STATUS_CHANGE: newStatus})
 

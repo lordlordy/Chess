@@ -6,6 +6,7 @@ import sys, tkinter
 from abc import ABC, abstractmethod
 from chessview import ChessGUI
 from boardgui import BoardCanvas
+import logging
 
 class TerminalChessObserver(AbstractObserver):
 
@@ -18,10 +19,10 @@ class TerminalChessObserver(AbstractObserver):
                 if v[0] == ChessConstants.MOVE_MADE:
                     player = v[1][ChessConstants.PLAYER]
                     move = v[1][ChessConstants.MOVE]
-                    print(f'{player}: {move}')
-                    print(self._board)
+                    logging.info(f'{player}: {move}')
+                    logging.debug(self._board)
                 else:
-                    print(v[1])
+                    logging.info(v[1])
 
 
 class ChessController(ABC):
@@ -51,7 +52,7 @@ class TerminalChessGame(ChessController):
             self.chessGame.setPlayer2(HumanPlayerTerminal(1, input("Player two name: ")))
         self.chessGame.newGame()
 
-        print(self.chessGame._board)
+        logging.debug(self.chessGame._board)
 
         # moveCount = 0
         while True:
@@ -76,11 +77,11 @@ class TerminalChessGame(ChessController):
                                 self.chessGame.promotePawn(pawn)
                         break
                     except IncorrectPlayerError as ipe:
-                        print(ipe)
+                        logging.error(ipe)
                         quitGame = 1
                         break
                     except Exception as e:
-                        print(e)
+                        logging.error(e)
                         continue
                 elif isinstance(move, str):
                     if move.lower() == 'h':
@@ -107,6 +108,7 @@ class TerminalChessGame(ChessController):
                         continue
                 else:
                     print('Invalid string')
+                    logging.warning('Invalid string')
                     quitGame = 1
                     break
             if quitGame:
@@ -159,7 +161,7 @@ class GUIChessController(ChessController, AbstractObserver):
         # used to manage the game order. Does nothing if players are human, just lets gui await the move
         # for a computer player this prods the computer to make it's move
         if self._gameOver:
-            print('game is over')
+            logging.info('game is over')
             return
         player = self.chessGame.playerToMove()
         if not player.isHuman():
@@ -167,7 +169,7 @@ class GUIChessController(ChessController, AbstractObserver):
             self.makeMove('')
 
     def makeMove(self, moveString):
-        print(f'Pieces Score = {self.chessGame._board.piecesScore()}')
+        logging.debug(f'Pieces Score = {self.chessGame._board.piecesScore()}')
         if self.chessGame.status() == ChessConstants.STATUS_GAME_OVER:
             return
         event = None
@@ -224,7 +226,7 @@ class GUIChessController(ChessController, AbstractObserver):
 
     def moves(self):
         moves = self.chessGame.moveListForCurrentPlayer()
-        print(moves)
+        logging.debug(moves)
 
     def setPlayer1(self, playerType, level=None):
         if playerType == ChessPlayers.HUMAN:
@@ -310,6 +312,17 @@ def startGUIMode(debug=False):
     root.mainloop()
 
 if __name__ == '__main__':
+
+    formatStr = '%(asctime)s %(levelname)s: %(filename)s %(funcName)s Line:%(lineno)d %(message)s'
+    dateFormatStr = '%Y-%b-%d %H:%M:%S'
+
+    level = logging.DEBUG if '-debug' in sys.argv else logging.INFO
+
+    logging.basicConfig(filename='Chess.log',
+                        filemode='w',
+                        level=level,
+                        format=formatStr,
+                        datefmt=dateFormatStr)
 
     if '-gui' in sys.argv:
         if '-debug' in sys.argv:

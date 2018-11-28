@@ -4,6 +4,7 @@ from chessgame import ChessConstants, ChessMove
 from chesspieces import Pawn
 from boardgui import OutlineSquaresEvent, HighlightSquaresEvent, BoardCanvas
 from chessplayers import ChessPlayers
+import logging
 
 class ChessGUI( AbstractObserver, Observable):
 
@@ -60,7 +61,7 @@ class ChessGUI( AbstractObserver, Observable):
 
         # TESTING
         pieceValue = self.controller.valueOfPiece(potentialMoveGridRef[0],potentialMoveGridRef[1])
-        print(f'Piece Value = {pieceValue}')
+        logging.debug(f'Piece Value = {pieceValue}')
 
         # END TESTING
 
@@ -195,10 +196,10 @@ class ChessGUI( AbstractObserver, Observable):
 
     def _player1LevelChanged(self,event):
         if self._player1Type.get() == ChessPlayers.COMPUTER_DEPTH and self.__player1Level() > 3:
-            print("WARNING: more than level 3 search gets exponentially slow")
+            logging.warning("WARNING: more than level 3 search gets exponentially slow")
             self.setFeedbackLabel("WARNING: more than level 3 search gets exponentially slow")
         elif self._player1Type.get() == ChessPlayers.COMPUTER_ALPHA_BETA and self.__player1Level() > 7:
-            print("WARNING: more than level 7 aplha beta search gets exponentially slow")
+            logging.warning("WARNING: more than level 7 aplha beta search gets exponentially slow")
             self.setFeedbackLabel("WARNING: more than level 7 aplha beta search gets exponentially slow")
         else:
             self.setFeedbackLabel("")
@@ -206,10 +207,10 @@ class ChessGUI( AbstractObserver, Observable):
 
     def _player2LevelChanged(self,event):
         if self._player2Type.get() == ChessPlayers.COMPUTER_DEPTH and self.__player2Level() > 3:
-            print("WARNING: more than level 3 search gets exponentially slow")
+            logging.warning("WARNING: more than level 3 search gets exponentially slow")
             self.setFeedbackLabel("WARNING: more than level 3 search gets exponentially slow")
         elif self._player2Type.get() == ChessPlayers.COMPUTER_ALPHA_BETA and self.__player2Level() > 7:
-            print("WARNING: more than level 7 aplha beta search gets exponentially slow")
+            logging.warning("WARNING: more than level 7 aplha beta search gets exponentially slow")
             self.setFeedbackLabel("WARNING: more than level 7 aplha beta search gets exponentially slow")
         else:
             self.setFeedbackLabel("")

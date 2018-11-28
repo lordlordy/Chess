@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import re
 from random import randint
 from chessgame import PawnPromotion, ChessConstants, BasicChessMoveCalculator
+import logging
 
 class ChessPlayers:
 
@@ -100,16 +101,16 @@ class ComputerLevelOnePlayer(ComputerLevelZeroPlayer):
         copyBoard.move(move.fromSquare, move.toSquare)
         score = copyBoard.piecesScore()
 
-        # print(f'\tSTART [{"Black" if isBlack else "White"}] move: {move} score: {score}')
+        logging.debug(f'\tSTART [{"Black" if isBlack else "White"}] move: {move} score: {score}')
 
         for i in range(1,len(availableMoves)):
             copyBoard = forBoard.copyOfBoard()
             copyBoard.move(availableMoves[i].fromSquare, availableMoves[i].toSquare)
             newScore = copyBoard.piecesScore()
-            # print(f'\t\tCONSIDERING move: {availableMoves[i]} score: {newScore}')
+            logging.debug(f'\t\tCONSIDERING move: {availableMoves[i]} score: {newScore}')
 
             if newScore*scoreFactor > score*scoreFactor:
-                # print(f'\tBetter - new best score is {newScore}')
+                logging.debug(f'\tBetter - new best score is {newScore}')
                 score = newScore
                 move = availableMoves[i]
 
@@ -132,22 +133,22 @@ class ComputerLevelTwoPlayer(ComputerLevelOnePlayer):
         move = availableMoves[randint(0, len(availableMoves)-1)]
         copyBoard = board.copyOfBoard()
         copyBoard.move(move.fromSquare, move.toSquare)
-        # print(f'START [{"Black" if self.isBlack else "White"}] move: {move}')
+        logging.debug(f'START [{"Black" if self.isBlack else "White"}] move: {move}')
         score = self._bestScoreAndMoveAfterAMove(copyBoard, not self.isBlack)[1] # this is scoring the opponents move
         # the best score is now the lowest score after the oponents move - as they're chosing the best for them
-        # print(f'SCORE: {score}')
+        logging.debug(f'SCORE: {score}')
 
         for i in range(1, len(availableMoves)):
             copyBoard = board.copyOfBoard()
             copyBoard.move(availableMoves[i].fromSquare, availableMoves[i].toSquare)
-            # print(f'\tCONSIDERING move: {availableMoves[i]}')
+            logging.debug(f'\tCONSIDERING move: {availableMoves[i]}')
 
             newScore = self._bestScoreAndMoveAfterAMove(copyBoard, not self.isBlack)
             # the best score is now the lowest score after the oponents move - as they're chosing the best for them
-            # print(f'\tSCORE: {newScore[1]}')
+            logging.debug(f'\tSCORE: {newScore[1]}')
 
             if newScore[1] * scoreFactor > score * scoreFactor:
-                # print(f'Better - new best score is {newScore[1]}')
+                logging.debug(f'Better - new best score is {newScore[1]}')
 
                 score = newScore[1]
                 move = availableMoves[i]
@@ -177,14 +178,14 @@ class ComputerTreeSearchPlayer(ComputerLevelTwoPlayer):
             return self._bestScore(0,board,self.isBlack, moves)[1]
 
     def _bestScore(self, depth, board, isBlack, moves=None):
-        # spaces = '  ' * depth
+        spaces = '  ' * depth
         if depth == self._depth:
             self.leafCount += 1
             # searched as far down as we want to go
             colour = 'Black' if isBlack else 'White'
             s = board.piecesScore()
-            print('\t\tSeaching tree: %s Score: %04d' % (self.leafCount, s), end='\r')
-            # print(f'{spaces}Depth: {depth} [{colour}] Searching tree: {self.leafCount}  score: {s}')
+            logging.debug(f'\t\tSeaching tree: {self.leafCount} Score: {s:04d}`r')
+            logging.debug(f'{spaces}Depth: {depth} [{colour}] Searching tree: {self.leafCount}  score: {s}')
             return (s, None)
         else:
             availableMoves = moves if moves else [m for m in self._calculator.possibleMoves(board,isBlack) if not m.disallowed]
@@ -193,16 +194,16 @@ class ComputerTreeSearchPlayer(ComputerLevelTwoPlayer):
                 score = 99999 # big positive number - so guaranteed all scores will be less than
                 move = None
                 for m in availableMoves:
-                    # if depth == 0:
-                        # self.moveCount += 1
-                        # print(f'checking {m} Move {self.moveCount} of {len(availableMoves)} moves')
+                    if depth == 0:
+                        self.moveCount += 1
+                    logging.debug(f'checking {m} Move {self.moveCount} of {len(availableMoves)} moves')
                     copyBoard = board.copyOfBoard() # CHECK - could do a lot of copies
                     copyBoard.move(m.fromSquare, m.toSquare)
                     newScore = self._bestScore(depth+1, copyBoard, not isBlack)[0]
                     if newScore < score:
                         score = newScore
                         move = m
-                # print(f'{spaces}DEPTH:{depth} [Black] Returning {move} with score {score}')
+                        logging.debug(f'{spaces}DEPTH:{depth} [Black] Returning {move} with score {score}')
                 return (score, move)
             else:
                 # white to positive is good
@@ -215,7 +216,7 @@ class ComputerTreeSearchPlayer(ComputerLevelTwoPlayer):
                     if newScore > score:
                         score = newScore
                         move = m
-                # print(f'{spaces}DEPTH:{depth} [White] Returning {move} with score {score}')
+                logging.debug(f'{spaces}DEPTH:{depth} [White] Returning {move} with score {score}')
                 return (score, move)
 
 
@@ -254,10 +255,10 @@ class ComputerTreeSearchAlphaBetaPlayer(ComputerLevelTwoPlayer):
             # searched as far down as we want to go
             s = board.piecesScore()
             if self.__debug:
-                print(f'{spaces}Depth:{depth} Tree leaf:{self.leafCount}  score:{s}')
+                logging.debug(f'{spaces}Depth:{depth} Tree leaf:{self.leafCount}  score:{s}')
             else:
-                # print(f'Seaching tree: {self.leafCount} depth: {depth} alpha: {alpha} beta: {beta}')
-                print('\t\tSeaching tree: %s  score: %s' % (self.leafCount, s), end='\r')
+                logging.debug(f'Seaching tree: {self.leafCount} depth: {depth} alpha: {alpha} beta: {beta}')
+                logging.debug('\t\tSeaching tree: {self.leafCount}  score: {s}\r')
             return (s, None)
         else:
             availableMoves = moves if moves else [m for m in self._calculator.possibleMoves(board, isBlack) if
@@ -270,8 +271,8 @@ class ComputerTreeSearchAlphaBetaPlayer(ComputerLevelTwoPlayer):
                     if self.__debug:
                         if depth == 0:
                             self.moveCount += 1
-                            print(f'Move {self.moveCount} of {len(availableMoves)} moves: checking {m} ')
-                        print(f'{spaces} Depth {depth} checking black {m}')
+                            logging.debug(f'Move {self.moveCount} of {len(availableMoves)} moves: checking {m} ')
+                        logging.debug(f'{spaces} Depth {depth} checking black {m}')
                     copyBoard = board.copyOfBoard()  # CHECK - could do a lot of copies
                     copyBoard.move(m.fromSquare, m.toSquare)
                     newScore = self._bestScore(depth + 1, alpha, beta, copyBoard, False)[0]
@@ -283,18 +284,16 @@ class ComputerTreeSearchAlphaBetaPlayer(ComputerLevelTwoPlayer):
                     # alpha beta pruning
                     beta = min(beta, newScore)
                     if beta <= alpha:
-                        # if depth == 0:
-                        #     if self.__debug:
-                        #         print(f'{spaces} NOT PRUNED AT DEPTH {depth} after checking {self.moveCount} moves aplha:beta={alpha}:{beta}')
-                        # else:
-                        #     if self.__debug:
-                        #         print(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
-                        #     break
-                        print(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
+                        if depth == 0:
+                            logging.debug(f'{spaces} NOT PRUNED AT DEPTH {depth} after checking {self.moveCount} moves aplha:beta={alpha}:{beta}')
+                        else:
+                            logging.debug(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
+                            break
+                        logging.debug(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
                         break
 
                 if self.__debug:
-                    print(f'{spaces}DEPTH:{depth} [Black] Returning {move} with score {score}')
+                    logging.debug(f'{spaces}DEPTH:{depth} [Black] Returning {move} with score {score}')
                 return (score, move)
             else:
                 # white to positive is good
@@ -304,8 +303,8 @@ class ComputerTreeSearchAlphaBetaPlayer(ComputerLevelTwoPlayer):
                     if self.__debug:
                         if depth == 0:
                             self.moveCount += 1
-                            print(f'Move {self.moveCount} of {len(availableMoves)} moves: checking {m} ')
-                        print(f'{spaces}checking white {m}')
+                            logging.debug(f'Move {self.moveCount} of {len(availableMoves)} moves: checking {m} ')
+                        logging.debug(f'{spaces}checking white {m}')
                     copyBoard = board.copyOfBoard()  # CHECK - could do a lot of copies
                     copyBoard.move(m.fromSquare, m.toSquare)
                     newScore = self._bestScore(depth + 1, alpha, beta, copyBoard, True)[0]
@@ -317,18 +316,15 @@ class ComputerTreeSearchAlphaBetaPlayer(ComputerLevelTwoPlayer):
                     # alpha beta pruning
                     alpha = max(alpha, newScore)
                     if beta <= alpha:
-                        # if depth == 0:
-                        #     if self.__debug:
-                        #         print(f'{spaces} NOT PRUNED AT DEPTH {depth} after checking {self.moveCount} moves aplha:beta={alpha}:{beta} ')
-                        # else:
-                        #     if self.__debug:
-                        #         print(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
-                        #     break
-                        print(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
+                        if depth == 0:
+                            logging.debug(f'{spaces} NOT PRUNED AT DEPTH {depth} after checking {self.moveCount} moves aplha:beta={alpha}:{beta} ')
+                        else:
+                            logging.debug(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
+                            break
+                            logging.debug(f'{spaces}PRUNED AT DEPTH {depth} aplha:beta={alpha}:{beta}')
                         break
 
-                if self.__debug:
-                    print(f'{spaces}DEPTH:{depth} [White] Returning {move} with score {score}')
+                logging.debug(f'{spaces}DEPTH:{depth} [White] Returning {move} with score {score}')
                 return (score, move)
 
 
